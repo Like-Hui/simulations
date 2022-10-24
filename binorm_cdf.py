@@ -52,17 +52,17 @@ def bvnu_(h, k, r):
         x+= [0.5108670019508271, 0.3737060887154196, 0.2277858511416451]
         x+= [0.07652652113349733]
 
-    w = matrix(w+w)
+    w = array(w+w)
     x = concatenate([1-array(x),1+array(x)]); 
 
     if abs(r) < 0.925:
         hs = ( h*h + k*k )/2
         asr = asin(r)/2;  
         sn = sin(asr*x); 
-        bvn = exp((sn*hk-hs)/(1-sn**2)) * w.H
+        bvn = exp((sn*hk-hs)/(1-sn**2)) @ w.T
         bvn = bvn*asr/tp + phid(-h)*phid(-k); 
-    elif r < 0:
-        k, hk = -k, -hk
+    else:
+        if r < 0: k, hk = -k, -hk
         if abs(r) < 1:
             as_ = 1-r**2; 
             a = sqrt(as_); 
@@ -83,7 +83,7 @@ def bvnu_(h, k, r):
             sp = ( 1 + c*xs*(1+5*d*xs) )
             rs = sqrt(1-xs); 
             ep = exp( -(hk/2)*xs/(1+rs)**2 )/rs; 
-            bvn = ( a*( (exp(asr(ix))*(sp-ep))*w(ix).H ) - bvn )/tp;
+            bvn = ( a*( (exp(asr[asr > -100])*(sp-ep)) @ w[asr > -100].T ) - bvn )/tp;
 
         if r > 0: 
             bvn =  bvn + phid(-max(h, k))
@@ -95,7 +95,7 @@ def bvnu_(h, k, r):
     
     p = max(0, min(1, bvn));
 
-    return p.item()
+    return p
 
 bvnu = vectorize(bvnu_)
 
